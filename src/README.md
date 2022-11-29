@@ -1,4 +1,4 @@
-# MAMBA
+# MAG
 This code accompanies the paper "Models as Agents: Optimizing Multi-Step Predictions of Interactive Local Models
 in Model-Based Multi-Agent Reinforcement Learning".
 
