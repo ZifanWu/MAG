@@ -10,6 +10,9 @@ The repository contains MAG implementation as well as fine-tuned hyperparameters
 python3 train.py --n_workers 2 --starcraft
 ```
 
+### Optimal parameters
+
+The optimal parameters are contained in `configs/dreamer/optimal/` folder.
 
 ## SMAC
 
