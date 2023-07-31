@@ -33,13 +33,13 @@ class DreamerLearnerConfig(DreamerConfig):
         self.MODEL_EPOCHS = 60
         self.EPOCHS = 4
         self.PPO_EPOCHS = 5
-        self.MODEL_BATCH_SIZE = 40 # 训model，每次抽MODEL_BATCH_SIZE条轨迹，每条轨迹长度为SEQ_LENGTH
+        self.MODEL_BATCH_SIZE = 40
 
-        self.max_MODEL_BATCH_SIZE = 2000 # 必须是MODEL_BATCH_SIZE的整数倍
-        self.holdout_ratio = 0.2 # 训练集里的轨迹数量：MODEL_BATCH_SIZE * (1-holdout_ratio)
-        self.mini_model_batch_size = 40 # 在训练集里面每次抽多少条轨迹
+        self.max_MODEL_BATCH_SIZE = 2000
+        self.holdout_ratio = 0.2
+        self.mini_model_batch_size = 40
 
-        self.BATCH_SIZE = 40 # 训policy
+        self.BATCH_SIZE = 40
         self.SEQ_LENGTH = 20
         self.N_SAMPLES = 1
         self.TARGET_UPDATE = 1
@@ -47,7 +47,7 @@ class DreamerLearnerConfig(DreamerConfig):
         self.GRAD_CLIP = 100.0
 
         self.HORIZON = 10
-        self.rollout_min_length = 15 # 全部缩短roll_len，然后增大MPCHorizon！
+        self.rollout_min_length = 15
         self.rollout_max_length = 15
         self.rollout_min_step = 1e3
         self.rollout_max_step = 2e4
@@ -58,7 +58,7 @@ class DreamerLearnerConfig(DreamerConfig):
         self.rec = True
         self.avl = True
         self.pcont = True
-        self.dis = True # TODO
+        self.dis = True
 
         self.MPCHorizon = 6
         self.n_trajs = 4
