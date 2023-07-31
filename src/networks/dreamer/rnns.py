@@ -8,7 +8,6 @@ from configs.dreamer.DreamerAgentConfig import RSSMState
 from networks.transformer.layers import AttentionEncoder
 from networks.dreamer.utils import build_model
 from agent.optim.utils import state_divergence_loss
-# from agent.optim.loss import model_loss
 
 
 def stack_states(rssm_states: list, dim):
@@ -74,7 +73,6 @@ class RSSMTransition(nn.Module):
         self._cell = nn.GRU(hidden_size, self._deter_size)
         self.config = config
         
-        # NOTE 弄清楚这一块的输入输出是什么，然后替换，变成参数共享
         if config.use_attn:
             self._attention_stack = AttentionEncoder(3, hidden_size, hidden_size, dropout=0.1) # NOTE
         else:
@@ -91,7 +89,7 @@ class RSSMTransition(nn.Module):
     def forward(self, prev_actions, prev_states, mask=None):
         batch_size, n_agents = prev_actions.shape[:2]
         stoch_input = self._rnn_input_model(torch.cat([prev_actions, prev_states.stoch], dim=-1))
-        # print(stoch_input.shape) # (?, n_ags, hidden_dim) n跟batch有关，执行时和训练时不一样
+        
         if self.config.use_attn:
             attn = self._attention_stack(stoch_input, mask=mask) # NOTE
         else:
@@ -100,7 +98,7 @@ class RSSMTransition(nn.Module):
         deter_state = self._cell(attn.reshape(1, batch_size * n_agents, -1),
                                  prev_states.deter.reshape(1, batch_size * n_agents, -1))[0].reshape(batch_size, n_agents, -1)
         logits, stoch_state = self._stochastic_prior_model(deter_state) # NOTE
-        # print(deter_state.shape, stoch_state.shape, logits.shape) # 前两个(?, n_ags, hidden_dim)后一个(?, n_ags, n_cate*n_class)
+        # print(deter_state.shape, stoch_state.shape, logits.shape) 
         return RSSMState(logits=logits, stoch=stoch_state, deter=deter_state)
 
     def para_predict(self, prev_actions, prev_states, mask=None):
@@ -109,12 +107,12 @@ class RSSMTransition(nn.Module):
         stoch = torch.cat([prev_state.stoch for prev_state in prev_states], dim=0) # (n_traj*B, n_ags, _dim)
         deter = torch.cat([prev_state.deter for prev_state in prev_states], dim=0) # (n_traj*B, n_ags, _dim)
         stoch_input = self._rnn_input_model(torch.cat([prev_actions, stoch], dim=-1)) # (n_traj*B, n_ags, _dim)
-        # print(stoch_input.shape) # (?, n_ags, hidden_dim) n跟batch有关，执行时和训练时不一样
+        
         if self.config.use_attn:
             attn = self._attention_stack(stoch_input, mask=mask) # NOTE
         else:
             attn = self._fc(stoch_input)
-        # print(1111, attn.shape) # (?, n_ags, hidden_dim)
+        
         deter_state = self._cell(attn.reshape(1, n_trajs * batch_size * n_agents, -1),
                                  deter.reshape(1, n_trajs * batch_size * n_agents, -1))[0]
         deter_state = deter_state.reshape(n_trajs * batch_size, n_agents, -1)
@@ -200,7 +198,7 @@ def rollout_policy(m_r_predictor, obs_decoder, transition_model, av_action, step
             imag_obs.append(obs)
             action, pi = policy(obs, seq=False)
         else:
-            # obs = obs_decoder(feat)[0].detach()
+            
             action, pi = policy(feat)
         if av_action is not None:
             avail_actions = av_action(feat).sample()
@@ -213,7 +211,7 @@ def rollout_policy(m_r_predictor, obs_decoder, transition_model, av_action, step
         actions.append(action)
         if config.use_MPCmodel:
             if config.use_epsilon_MPC and np.random.uniform(low=0, high=1, size=1)[0] < config.MPCepsilon:
-                state = transition_model(action, state) # 只有prior，这次没有posterior了，所以m_r_predictor的输入只能是prior
+                state = transition_model(action, state) 
             else:
                 with torch.no_grad():
                     state, minloss, ranloss = MPCPredict(policy, m_r_predictor, action, state, transition_model, config, av_action=av_action)
@@ -243,7 +241,7 @@ def MPCPredict(policy, m_r_predictor, action, state, transition_model, config, a
     for t in range(config.MPCHorizon):
         if t == 0:
             traj_states, logits, stoch_state, deter_state = transition_model.para_predict(action, traj_states) # len: n_trajs; shape: (B, n_ags, _dim)
-            first_pred = traj_states # 一个state的列表
+            first_pred = traj_states 
         else:
             traj_states = transition_model.para_predict(action, traj_states)[0] # len: n_trajs; shape: (B, n_ags, _dim)
         feat = torch.stack([state.get_features() for state in traj_states])
@@ -262,7 +260,7 @@ def MPCPredict(policy, m_r_predictor, action, state, transition_model, config, a
                 action_dist = OneHotCategorical(logits=pi)
                 action = action_dist.sample().squeeze(0).reshape(config.n_trajs, batch_size, n_agents, action.shape[-1])
 
-    best_traj = traj_losses.argmin() # (B,) TODO弄个(1, B) 代入logits那些
+    best_traj = traj_losses.argmin() 
     # if config.use_wandb:
     #     wandb.log({'m_r_loss': traj_losses.min()})
     # idx = [[best_traj[i], i] for i in range(batch_size)]
