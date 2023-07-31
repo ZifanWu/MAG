@@ -90,20 +90,6 @@ class DreamerLearner:
         Path(config.LOG_FOLDER).mkdir(parents=True, exist_ok=True)
         global wandb
         import wandb
-        # wandb.init(dir=config.LOG_FOLDER)
-        # config.seed = torch.randint(0, 10000, (1,)).item()
-        # wandb.init(config=config,
-        #             project='Multi-Agent Ensemble',
-        #             entity='zarzard',
-        #             notes=socket.gethostname(),
-        #             name=str('mamba') + "_" +
-        #                 str(config.seed),
-        #             group=config.env_name,
-        #             dir=config.LOG_FOLDER,
-        #             job_type="training",
-        #             reinit=True)
-        # setproctitle.setproctitle(
-        # str(config.env_name) + "@" + str(config.seed))
 
     def init_optimizers(self):
         self.model_optimizer = [torch.optim.Adam(model.parameters(), lr=self.config.MODEL_LR) for model in self.model]
@@ -135,9 +121,6 @@ class DreamerLearner:
         sys.stdout.flush()
 
         # ------------------------------ train model ------------------------------
-        # if len(self.replay_buffer)/self.config.SEQ_LENGTH < self.config.MODEL_BATCH_SIZE:
-        #     self.B = self.config.MODEL_BATCH_SIZE
-        losses = []
         self.replay_buffer.init_sampled_idx()
         for i in range(self.config.MODEL_EPOCHS):
             samples = self.replay_buffer.sample(self.config.MODEL_BATCH_SIZE)
@@ -159,40 +142,10 @@ class DreamerLearner:
             # losses_per_step = torch.cat(losses_per_step, dim=1) # (T, epoch*epoch_batch_size (40*60), n_ags, _dim)
                 self.train_m_r_predictor(samples, loss_per_step)
 
-        # else:
-        #     if (len(self.replay_buffer)/self.config.SEQ_LENGTH) % self.config.MODEL_BATCH_SIZE == 0 and \
-        #         len(self.replay_buffer) / (self.config.SEQ_LENGTH) <= self.config.max_MODEL_BATCH_SIZE:
-        #         # 增大样本规模到buffer数据量，最多翻6倍，即B: MODEL_BATCH_SIZE -> max_MODEL_BATCH_SIZE
-        #         self.B = int(len(self.replay_buffer) / self.config.SEQ_LENGTH)
-        #     self.prep_model_training()
-        #     samples = self.replay_buffer.sample(self.B, repeat=False) # repeat的含义：整条轨迹完全相同才算repeat，一部分重叠不算在内
-        #     # -----------分出训练集和测试集-----------
-        #     holdout_samples = {}
-        #     num_holdouts = int(self.config.holdout_ratio * self.B)
-        #     for key in samples.keys():
-        #         holdout_samples[key] = samples[key][:, :num_holdouts] # 由于sample时就已经随机打乱了，所以这里直接截断
-        #         samples[key] = samples[key][:, num_holdouts:]
-        #     # -----------外循环，到holdout_loss下降到一定程度才结束-----------
-        #     for epoch in itertools.count():
-        #         # 打乱训练集轨迹之间顺序
-        #         for key in samples.keys():
-        #             samples[key] = samples[key][:, np.random.permutation(samples[key].shape[1])]
-        #         # -----------内循环，把训练集的轨迹分成多个mini_batch，每次对一个mini_batch求梯度-----------
-        #         for start_idx in range(0, self.B-num_holdouts, self.config.mini_model_batch_size):
-        #             mini_sample = {}
-        #             for key in samples.keys():
-        #                 mini_sample[key] = samples[key][:, start_idx: start_idx + self.config.mini_model_batch_size]
-        #             self.train_model(mini_sample)
-        #         # -----------验证集loss-----------
-        #         with torch.no_grad():
-        #             holdout_loss = self.train_model(holdout_samples, validation=True)
-        #             break_train = self._save_best(epoch, holdout_loss)
-        #             if break_train:
-        #                 print('number of model epochs: {}, holdout_loss: {}'.format(epoch, holdout_loss))
-        #                 break
+        
 
         for i in range(self.config.EPOCHS):
-            samples = self.replay_buffer.sample(self.config.BATCH_SIZE) # 初始
+            samples = self.replay_buffer.sample(self.config.BATCH_SIZE) 
             self.train_agent(samples)
 
     def _save_best(self, epoch, holdout_losses):
@@ -224,12 +177,6 @@ class DreamerLearner:
         self.m_r_predictor.train()
         assert len(self.model) == 1
         mr_losses = []
-        # for epoch in range(self.config.m_r_predictor_epochs):
-        #     idx = np.random.randint(0, loss.shape[1], self.config.m_r_predictor_batch_size)
-        #     mini_loss = loss[:, idx]
-        #     mini_sample = {}
-        #     for key in samples.keys():
-        #         mini_sample[key] = samples[key][:, idx]
         m_r_loss = m_r_perdictor_loss(self.config, self.model[0], self.m_r_predictor, mini_sample['observation'], 
             mini_sample['action'], mini_sample['av_action'], mini_sample['reward'], mini_sample['done'], mini_sample['fake'], mini_sample['last'], mini_loss)
         self.m_r_optim.zero_grad()
