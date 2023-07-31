@@ -8,7 +8,6 @@ import wandb
 from agent.runners.DreamerRunner import DreamerRunner
 from configs import Experiment
 from configs.EnvConfigs import StarCraftConfig, EnvCurriculumConfig
-# from configs.flatland.RewardConfigs import FinishRewardConfig
 from configs.dreamer.DreamerControllerConfig import DreamerControllerConfig
 from configs.dreamer.DreamerLearnerConfig import DreamerLearnerConfig
 from environments import Env
