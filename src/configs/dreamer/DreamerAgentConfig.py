@@ -42,7 +42,7 @@ class DreamerConfig(Config):
 
         self.baseline = False
         if self.baseline:
-            self.obs_as_pol_in = False # 要么都True要么都False
+            self.obs_as_pol_in = False
             self.use_attn = True
         
         self.n_nets = 1
