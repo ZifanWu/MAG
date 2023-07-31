@@ -6,14 +6,12 @@ import setproctitle
 import wandb
 
 from agent.runners.DreamerRunner import DreamerRunner
-from configs import Experiment #, SimpleObservationConfig, NearRewardConfig, DeadlockPunishmentConfig, RewardsComposerConfig
+from configs import Experiment
 from configs.EnvConfigs import StarCraftConfig, EnvCurriculumConfig
 # from configs.flatland.RewardConfigs import FinishRewardConfig
 from configs.dreamer.DreamerControllerConfig import DreamerControllerConfig
 from configs.dreamer.DreamerLearnerConfig import DreamerLearnerConfig
-# from configs.flatland.TimetableConfigs import AllAgentLauncherConfig
-# from env.flatland.params import SeveralAgents, PackOfAgents, LotsOfAgents
-from environments import Env#, FlatlandType, FLATLAND_OBS_SIZE, FLATLAND_ACTION_SIZE
+from environments import Env
 
 
 def parse_args():
@@ -96,8 +94,8 @@ if __name__ == "__main__":
 
     if configs["learner_config"].use_wandb:
         wandb.init(config=configs["learner_config"],
-                    project='Multi-Agent Ensemble',
-                    entity='zarzard',
+                    project='',
+                    entity='',
                     notes=socket.gethostname(),
                     name='S4_' + str(RANDOM_SEED) + '_' + args.cuda_num,
                     group=args.env_name,
