@@ -79,10 +79,7 @@ class DreamerLearner:
         self.elite_idxs = np.arange(config.n_elites)
 
         if config.use_MPCmodel:
-            # self.o_a_feat = DenseModel(config.FEAT + config.ACTION_SIZE, config.HIDDEN, 2, config.HIDDEN) # NOTE 暂时多智能体共享网络
             self.m_r_predictor = DenseModel(config.FEAT, 1, 4, config.HIDDEN).to(config.DEVICE)
-            # params = [self.m_r_predictor.parameters()]
-            # params.append(self.o_a_feat.parameters())
             self.m_r_optim = torch.optim.Adam(self.m_r_predictor.parameters(), lr=5e-4)
         else:
             self.m_r_predictor = None
@@ -130,16 +127,14 @@ class DreamerLearner:
         self.elite_idxs = np.argsort(losses)[:self.config.n_elites]
         # ------------------------train m_r_predictor--------------------------------
         if self.config.use_MPCmodel:
-            # samples = self.replay_buffer.sample_all() # (T, B, n_ags, _dim)
+            
             assert len(self.model) == 1
-            # losses_per_step = []
+            
             for epoch in range(self.config.m_r_predictor_epochs):
                 samples = self.replay_buffer.sample(self.config.MODEL_BATCH_SIZE)
                 with torch.no_grad():
                     _, loss_per_step = get_model_loss_for_m_r_training(self.config, self.model[0], samples['observation'], samples['action'], samples['av_action'],
                     samples['reward'], samples['done'], samples['fake'], samples['last']) # (T-1,)
-                # losses_per_step.append(loss_per_step)
-            # losses_per_step = torch.cat(losses_per_step, dim=1) # (T, epoch*epoch_batch_size (40*60), n_ags, _dim)
                 self.train_m_r_predictor(samples, loss_per_step)
 
         
@@ -182,7 +177,7 @@ class DreamerLearner:
         self.m_r_optim.zero_grad()
         m_r_loss.backward()
         mr_losses.append(m_r_loss.item())
-        # print('epoch: {}, m_r_loss: {}'.format(epoch,  m_r_loss.item()))
+        
         self.m_r_optim.step()
         self.m_r_predictor.eval()
         if self.config.use_wandb:
@@ -193,7 +188,7 @@ class DreamerLearner:
         for i, model in enumerate(self.model):
             model.train()
             self.model_optimizer[i].zero_grad()
-        # samples['observation'].shape: (ep_l, B, n_ags, _dim)
+        
             loss, _ = model_loss(self.config, model, samples['observation'], samples['action'], samples['av_action'],
                           samples['reward'], samples['done'], samples['fake'], samples['last'])
             losses.append(loss.detach().item())
@@ -207,7 +202,7 @@ class DreamerLearner:
     def train_agent(self, samples):
         actions_ens, av_actions_ens, old_policy_ens, imag_feat_ens, returns_ens, imag_obs_ens = [list() for i in range(6)]
         for i in self.elite_idxs:
-            # print(samples['action'].shape) # (ep_l-1, roll_B, n_ags, _dim)
+            
             actions, av_actions, old_policy, imag_feat, returns, imag_obs = actor_rollout(samples['observation'],
                                                                             samples['action'],
                                                                             samples['last'], 
@@ -228,14 +223,12 @@ class DreamerLearner:
                 imag_obs_ens.append(imag_obs)
         actions, av_actions, old_policy, imag_feat, returns = torch.concat(actions_ens, dim=0), torch.concat(av_actions_ens, dim=0), \
             torch.concat(old_policy_ens, dim=0), torch.concat(imag_feat_ens, dim=0), torch.concat(returns_ens, dim=0)
-        # (n_elites*(roll_len-1)*roll_B, n_ags, _dim) where roll_B = (ep_l-2)*roll_episode_B
         if self.config.obs_as_pol_in:
             imag_obs = torch.concat(imag_obs_ens, dim=0)
         adv = returns.detach() - self.critic(imag_feat, actions).detach()
         if self.config.ENV_TYPE == Env.STARCRAFT:
             adv = advantage(adv)
-        # if self.config.use_wandb:
-        #     wandb.log({'Agent/Returns': returns.mean()})
+        
         for _ in range(self.config.PPO_EPOCHS):
             inds = np.random.permutation(actions.shape[0])
             # inds = np.arange(actions.shape[0])
