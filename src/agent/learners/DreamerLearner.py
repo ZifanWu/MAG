@@ -212,8 +212,8 @@ class DreamerLearner:
                                                                             else self.old_critic,
                                                                             self.config, 
                                                                             self.total_samples,
-                                                                            self.m_r_predictor) # old_pol是logits
-            # print(actions.shape, imag_feat.shape, imag_obs.shape) # ((roll_len-1)*(ep_l-2)*roll_B, n_ags, _dim)
+                                                                            self.m_r_predictor) 
+            
             actions_ens.append(actions)
             av_actions_ens.append(av_actions)
             old_policy_ens.append(old_policy)
@@ -231,9 +231,8 @@ class DreamerLearner:
         
         for _ in range(self.config.PPO_EPOCHS):
             inds = np.random.permutation(actions.shape[0])
-            # inds = np.arange(actions.shape[0])
+            
             step = 2000
-            # self.actor.hidden = torch.zeros(1, int(actions.shape[0]*actions.shape[1]), self.actor.rnn_out_dim, device=actions.device)
             for i in range(0, len(inds), step):
                 self.cur_update += 1
                 idx = inds[i:i + step]
