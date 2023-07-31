@@ -99,7 +99,7 @@ class DreamerWorker:
             actions, obs, fakes, av_actions = self._select_actions(state)
             next_state, reward, done, info = self.env.step([action.argmax() for i, action in enumerate(actions)])
             # reward一个dict，{0: rew, 1: rew, ..., N: rew}
-            rewards.append(list(reward.values())[0]) # NOTE 星际争霸共享reward
+            rewards.append(list(reward.values())[0])
             next_state, reward, done = self._wrap(deepcopy(next_state)), self._wrap(deepcopy(reward)), self._wrap(deepcopy(done))
             self.done = done
             self.controller.update_buffer({"action": actions,
