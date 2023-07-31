@@ -28,7 +28,7 @@ class DreamerLearnerConfig(DreamerConfig):
         self.MODEL_LR = 5e-4
         self.ACTOR_LR = 5e-4
         self.VALUE_LR = 5e-4
-        self.CAPACITY = 250000 # transition总数
+        self.CAPACITY = 250000
         self.MIN_BUFFER_SIZE = 500
         self.MODEL_EPOCHS = 60
         self.EPOCHS = 4
