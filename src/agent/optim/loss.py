@@ -8,7 +8,6 @@ from agent.optim.utils import rec_loss, compute_return, state_divergence_loss, c
 from agent.utils.params import FreezeParameters
 from networks.dreamer.rnns import rollout_representation, rollout_policy
 
-# 需要找到每一步(o, a)->loss的样本
 
 def m_r_perdictor_loss(config, model, m_r_predictor, obs, action, av_action, reward, done, fake, last, loss):
     # shape: (T, B, n_ags, _dim); loss.shape: (T-1, B, n_ags, 1)
@@ -48,7 +47,7 @@ def get_model_loss_for_m_r_training(config, model, obs, action, av_action, rewar
     _, div_per_step = state_divergence_loss(prior, post, config)
     div_per_step = div_per_step.unsqueeze(-1)
 
-    model_loss_per_step = div_per_step  # TODO 试验一下！！
+    model_loss_per_step = div_per_step 
     if config.rec:
         model_loss_per_step += rec_loss_per_step
     if config.rew:
