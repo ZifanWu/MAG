@@ -16,7 +16,7 @@ class DreamerModel(nn.Module):
         self.observation_encoder = Encoder(in_dim=config.IN_DIM, hidden=config.HIDDEN, embed=config.EMBED)
         self.observation_decoder = Decoder(embed=config.FEAT, hidden=config.HIDDEN, out_dim=config.IN_DIM)
 
-        self.transition = RSSMTransition(config, config.MODEL_HIDDEN) # 只用在下一行
+        self.transition = RSSMTransition(config, config.MODEL_HIDDEN) 
         self.representation = RSSMRepresentation(config, self.transition)
         self.reward_model = DenseModel(config.FEAT, 1, config.REWARD_LAYERS, config.REWARD_HIDDEN)
         self.pcont = DenseBinaryModel(config.FEAT, 1, config.PCONT_LAYERS, config.PCONT_HIDDEN)
