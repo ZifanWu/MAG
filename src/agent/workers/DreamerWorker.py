@@ -88,8 +88,7 @@ class DreamerWorker:
     def run(self, dreamer_params):
         self.controller.receive_params(dreamer_params)
         state = self.env.reset() # list, len: n_ags, shape: (s_dim,)
-        # self.controller.actor.init_hidden(len(state)) # batch_size=n_ags*ep_l
-        # self.controller.actor.hidden = torch.zeros(1, len(state), self.controller.actor.rnn_out_dim)
+        
         state = self._wrap(state)
         steps_done = 0
         self.done = defaultdict(lambda: False)
@@ -98,7 +97,6 @@ class DreamerWorker:
             steps_done += 1
             actions, obs, fakes, av_actions = self._select_actions(state)
             next_state, reward, done, info = self.env.step([action.argmax() for i, action in enumerate(actions)])
-            # reward一个dict，{0: rew, 1: rew, ..., N: rew}
             rewards.append(list(reward.values())[0])
             next_state, reward, done = self._wrap(deepcopy(next_state)), self._wrap(deepcopy(reward)), self._wrap(deepcopy(done))
             self.done = done
