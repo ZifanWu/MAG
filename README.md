@@ -1,6 +1,6 @@
 # MAG
-This code accompanies the paper "Models as Agents: Optimizing Multi-Step Predictions of Interactive Local Models
-in Model-Based Multi-Agent Reinforcement Learning".
+This code accompanies the paper "[Models as Agents: Optimizing Multi-Step Predictions of Interactive Local Models
+in Model-Based Multi-Agent Reinforcement Learning](https://ojs.aaai.org/index.php/AAAI/article/view/26241)".
 
 The repository contains MAG implementation as well as fine-tuned hyperparameters in ```configs/dreamer/optimal``` folder.
 
@@ -24,11 +24,11 @@ The code for the environment can be found at
 
 ## Code Structure
 
-- ```agent``` contains implementation of MAMBA 
+- ```agent``` contains implementation of MAG 
   - ```controllers``` contains logic for inference
   - ```learners``` contains logic for learning the agent
   - ```memory``` contains buffer implementation
-  - ```models``` contains architecture of MAMBA
+  - ```models``` contains architecture of MAG
   - ```optim``` contains logic for optimizing loss functions
   - ```runners``` contains logic for running multiple workers
   - ```utils``` contains helper functions
